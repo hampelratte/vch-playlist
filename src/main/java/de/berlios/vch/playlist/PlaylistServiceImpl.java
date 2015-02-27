@@ -65,7 +65,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     @Override
     public void play(Playlist playlist, Map<String, String> requestPrefs) throws UnknownHostException, IOException, URISyntaxException {
         String svdrpHost = prefs.get("svdrp.host", "localhost");
-        int svdrpPort = prefs.getInt("svdrp.port", 2001);
+        int svdrpPort = prefs.getInt("svdrp.port", 6419);
 
         if (requestPrefs != null) {
             if (requestPrefs.containsKey("svdrphost")) {
