@@ -26,6 +26,7 @@ import org.osgi.service.log.LogService;
 import de.berlios.vch.config.ConfigService;
 import de.berlios.vch.net.INetworkProtocol;
 import de.berlios.vch.playlist.io.svdrp.CheckMplayerSvdrpInterface;
+import de.berlios.vch.playlist.io.svdrp.CheckMpvSvdrpInterface;
 import de.berlios.vch.playlist.io.svdrp.CheckXineliboutputSvdrpInterface;
 import de.berlios.vch.playlist.io.svdrp.CheckXinemediaplayerSvdrpInterface;
 
@@ -36,7 +37,7 @@ public class PlaylistServiceImpl implements PlaylistService {
     private Playlist playlist = new Playlist();
 
     public static enum MediaPlayer {
-        MPLAYER, XINEMEDIAPLAYER, XINELIBOUTPUT
+        MPLAYER, XINEMEDIAPLAYER, XINELIBOUTPUT, MPV
     };
 
     public static MediaPlayer player = null;
@@ -85,7 +86,7 @@ public class PlaylistServiceImpl implements PlaylistService {
             Command playCmd = getPlayCommand(svdrp, pls);
             fw = new FileWriter(pls);
 
-            if (player == MediaPlayer.MPLAYER || player == MediaPlayer.XINEMEDIAPLAYER) {
+            if (player == MediaPlayer.MPLAYER || player == MediaPlayer.XINEMEDIAPLAYER || player == MediaPlayer.MPV) {
                 for (PlaylistEntry playlistEntry : playlist) {
                     // check, if we have to use a stream bridge for this format
                     String uri = bridgeIfNecessary(playlistEntry);
@@ -189,7 +190,24 @@ public class PlaylistServiceImpl implements PlaylistService {
                         }
                     };
                 } else {
-                    throw new IOException("No media player plugin available");
+                    res = svdrp.send(new CheckMpvSvdrpInterface());
+                    if (res.getCode() == 214) {
+                        logger.log(LogService.LOG_DEBUG, "Using mpv to play the file");
+                        player = MediaPlayer.MPV;
+                        return new Command() {
+                            @Override
+                            public String getCommand() {
+                                return "plug mpv play " + playlistFile.getAbsolutePath();
+                            }
+
+                            @Override
+                            public String toString() {
+                                return "MPV PLAY";
+                            }
+                        };
+                    } else {
+                        throw new IOException("No media player plugin available");
+                    }
                 }
             }
         }
