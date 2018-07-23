@@ -3,7 +3,7 @@
     <artifactId>playlist</artifactId>
     <packaging>bundle</packaging>
     <name>VCH Playlist</name>
-    <version>1.2.1</version>
+    <version>1.2.2-SNAPSHOT</version>
     <description>Adds playlist support to VCH.</description>
 
     <parent>
